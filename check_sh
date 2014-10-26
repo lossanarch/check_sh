@@ -117,6 +117,8 @@ def fill_data(table):
 
   for i in data:
     table.add_row(i)
+  
+  table.rows = sorted(table.rows, key=lambda x: x[5])
 
   #do some kind of thing to get the data
   #  table.add_row(['lamech.mikeit.com.au','Check_MK','CRIT - Cannot get data from TCP port 103.20.20.10:6556','40'])
@@ -128,6 +130,7 @@ def get_check_data():
   sock.send("GET services\nFilter: state >= 1\nColumns: host_name description plugin_output service_last_check host_last_check state\n")
   sock.shutdown(socket.SHUT_WR)
   a = sock.recv(100000000)
+  sock.close()
 
   chk_data = [ line.split(';') for line in a.split('\n')[:-1] ]
 
