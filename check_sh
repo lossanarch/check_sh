@@ -3,27 +3,37 @@
 
 import curses
 import socket
+import time
 
 socket_path = "/omd/sites/prod/tmp/run/live"
 
 def mainloop(stdscr):
   curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
   curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-  curses.init_pair(3, 130, curses.COLOR_BLACK)
+  try:
+    curses.init_pair(3, 130, curses.COLOR_BLACK)
+  except curses.error:
+    curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
+  curses.halfdelay(50)
   sy, sx = resize(stdscr)
   table = Table(['Host','Service','Status Detail','Chk'])
   while 1:
-    c = stdscr.getch()
+    table = fill_data(table)
+    update_columns(stdscr, sy, sx, table)
+    try:
+      c = stdscr.getch()
+    except curses.error:
+      pass
     if c == ord('q'): 
       break
     elif c == curses.KEY_RESIZE:
       sy, sx = resize(stdscr)
     elif c == ord('b'):
       drawborder(stdscr, sy, sx)
-    elif c == ord('u'):
-      update_columns(stdscr, sy, sx, table)
-    elif c == ord('r'):
-      table = fill_data(table)
+    #elif c == ord('u'):
+    #  update_columns(stdscr, sy, sx, table)
+    #elif c == ord('r'):
+    #  table = fill_data(table)
 
 def resize(stdscr):
   y, x = stdscr.getmaxyx()
@@ -74,6 +84,7 @@ def update_columns(stdscr, max_y, max_x, table):
   c4e = c4s + c4size - 1
 
   #write column headers
+  stdscr.clear()
   stdscr.addstr(0, c1s, table.columns[0][:c1size-1], curses.A_BOLD)
   stdscr.addstr(0, c2s, table.columns[1][:c2size-1], curses.A_BOLD)
   stdscr.addstr(0, c3s, table.columns[2][:c3size-1], curses.A_BOLD)
@@ -83,9 +94,9 @@ def update_columns(stdscr, max_y, max_x, table):
   r = 1
   for i in table.rows:
     if int(i[5]) == 1:
-      c = 1
-    elif int(i[5]) == 2:
       c = 2
+    elif int(i[5]) == 2:
+      c = 1
     elif int(i[5]) == 3:
       c = 3
     else:
@@ -94,8 +105,11 @@ def update_columns(stdscr, max_y, max_x, table):
     stdscr.addstr(r, c1s, i[0][:c1size-1], curses.color_pair(c))
     stdscr.addstr(r, c2s, i[1][:c2size-1], curses.color_pair(c))
     stdscr.addstr(r, c3s, i[2][:c3size-1], curses.color_pair(c))
-    stdscr.addstr(r, c4s, i[3][:c4size-1], curses.color_pair(c))
+    stdscr.addstr(r, c4s, str(int(time.time())-int(i[3]))[:c4size-1], curses.color_pair(c))
     r += 1
+
+  #stdscr.refresh()
+
 
 class Table:
   #should be started with array of column names passed to it
@@ -113,6 +127,8 @@ class Table:
 def fill_data(table):
 
   data = get_check_data()
+
+  table.clear()
 
   for i in data:
     table.add_row(i)
