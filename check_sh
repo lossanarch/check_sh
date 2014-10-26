@@ -7,12 +7,6 @@ import socket
 socket_path = "/omd/sites/prod/tmp/run/live"
 sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
-#stdscr = curses.initscr()
-#curses.noecho()
-#curses.cbreak()
-#stdscr.keypad(1)
-##or...
-
 def mainloop(stdscr):
   curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
   curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
@@ -81,24 +75,27 @@ def update_columns(stdscr, max_y, max_x, table):
   c4e = c4s + c4size - 1
 
   #write column headers
-  stdscr.addstr(0, c1s, table.columns[0][:c1size-1])
-  stdscr.addstr(0, c2s, table.columns[1][:c2size-1])
-  stdscr.addstr(0, c3s, table.columns[2][:c3size-1])
-  stdscr.addstr(0, c4s, table.columns[3][:c4size-1])
+  stdscr.addstr(0, c1s, table.columns[0][:c1size-1], curses.A_BOLD)
+  stdscr.addstr(0, c2s, table.columns[1][:c2size-1], curses.A_BOLD)
+  stdscr.addstr(0, c3s, table.columns[2][:c3size-1], curses.A_BOLD)
+  stdscr.addstr(0, c4s, table.columns[3][:c4size-1], curses.A_BOLD)
 
   #take any row entry in table and display in columns
   r = 1
   for i in table.rows:
-    if i[5] == 1:
+    if int(i[5]) == 1:
       c = 1
-    elif i[5] == 2:
+    elif int(i[5]) == 2:
       c = 2
-    elif i[5] == 3:
+    elif int(i[5]) == 3:
       c = 3
-    stdscr.addstr(r, c1s, i[0][:c1size-1])
-    stdscr.addstr(r, c2s, i[1][:c2size-1])
-    stdscr.addstr(r, c3s, i[2][:c3size-1])
-    stdscr.addstr(r, c4s, i[3][:c4size-1])
+    else:
+      c = 0
+
+    stdscr.addstr(r, c1s, i[0][:c1size-1], curses.color_pair(c))
+    stdscr.addstr(r, c2s, i[1][:c2size-1], curses.color_pair(c))
+    stdscr.addstr(r, c3s, i[2][:c3size-1], curses.color_pair(c))
+    stdscr.addstr(r, c4s, i[3][:c4size-1], curses.color_pair(c))
     r += 1
 
 class Table:
@@ -118,7 +115,6 @@ def fill_data(table):
 
   data = get_check_data()
 
-  #colours: red, yellow, 130
   for i in data:
     table.add_row(i)
 
@@ -134,7 +130,7 @@ def get_check_data():
   a = sock.recv(100000000)
 
   chk_data = [ line.split(';') for line in a.split('\n')[:-1] ]
-  print chk_data
+
   return chk_data
 
 
