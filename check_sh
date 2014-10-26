@@ -23,12 +23,6 @@ def mainloop(stdscr):
     c = stdscr.getch()
     if c == ord('q'): 
       break
-    elif c == ord('m'):
-      writeextras(stdscr)
-    elif c == ord('o'):
-      overwrite(stdscr)
-    elif c == ord('c'):
-      colours(stdscr)
     elif c == curses.KEY_RESIZE:
       sy, sx = resize(stdscr)
     elif c == ord('b'):
@@ -37,31 +31,6 @@ def mainloop(stdscr):
       update_columns(stdscr, sy, sx, table)
     elif c == ord('r'):
       table = fill_data(table)
-
-
-def writeextras(stdscr):
-  stdscr.addstr(12,0,"Ay Blinken?",curses.A_BLINK)
-  stdscr.addstr(13,0,"Bold",curses.A_BOLD)
-  stdscr.addstr(14,0,"Dim",curses.A_DIM)
-  stdscr.addstr(15,0,"Reverse",curses.A_REVERSE)
-  stdscr.addstr(16,0,"Standout",curses.A_STANDOUT)
-  stdscr.addstr(17,0,"Underline",curses.A_UNDERLINE)
-
-def overwrite(stdscr):
-  for y in range(0,25):
-    for x in range(0,79):
-      try:
-        stdscr.addch(y,x, ord('a'))
-      except curses.error:
-        pass
-
-def colours(stdscr):
-  for i in range(0,8):
-    try:
-      curses.init_pair(i,i,0)
-    except curses.error:
-      pass
-    stdscr.addstr(i,0,"Colour " + str(i),curses.color_pair(i))
 
 def resize(stdscr):
   y, x = stdscr.getmaxyx()
@@ -120,36 +89,17 @@ def update_columns(stdscr, max_y, max_x, table):
   #take any row entry in table and display in columns
   r = 1
   for i in table.rows:
-    if i[6] == 1:
+    if i[5] == 1:
       c = 1
-    elif i[6] == 2:
+    elif i[5] == 2:
       c = 2
-    elif i[6] == 3:
+    elif i[5] == 3:
       c = 3
     stdscr.addstr(r, c1s, i[0][:c1size-1])
     stdscr.addstr(r, c2s, i[1][:c2size-1])
     stdscr.addstr(r, c3s, i[2][:c3size-1])
     stdscr.addstr(r, c4s, i[3][:c4size-1])
     r += 1
-
-  #test by filling with chars
-  ''' 
-  try:  
-    for y in xrange(0, (max_y - 1)):
-      for x in xrange(c1s, c1e):
-        stdscr.addch(y, x, ord('1'))
-    for y in xrange(0, (max_y - 1)):
-      for x in xrange(c2s, c2e):
-        stdscr.addch(y, x, ord('2'))
-    for y in xrange(0, (max_y - 1)):
-      for x in xrange(c3s, c3e):
-        stdscr.addch(y, x, ord('3'))
-    for y in xrange(0, (max_y - 1)):
-      for x in xrange(c4s, c4e):
-        stdscr.addch(y, x, ord('4'))
-  except curses.error:
-    pass
-  '''
 
 class Table:
   #should be started with array of column names passed to it
@@ -179,11 +129,12 @@ def fill_data(table):
 
 def get_check_data():
   sock.connect(socket_path)
-  sock.send("GET services\nFilter: state >= 1\nColumns: host_name description plugin_output service_last_check host_last_check state")
+  sock.send("GET services\nFilter: state >= 1\nColumns: host_name description plugin_output service_last_check host_last_check state\n")
   sock.shutdown(socket.SHUT_WR)
   a = sock.recv(100000000)
-  chk_data = [ line.split(';') for line in answer.split('\n')[:-1] ]
-  
+
+  chk_data = [ line.split(';') for line in a.split('\n')[:-1] ]
+  print chk_data
   return chk_data
 
 
