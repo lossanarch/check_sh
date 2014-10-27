@@ -94,9 +94,9 @@ def update_columns(stdscr, max_y, max_x, table):
   r = 1
   for i in table.rows:
     if int(i[5]) == 1:
-      c = 2
-    elif int(i[5]) == 2:
       c = 1
+    elif int(i[5]) == 2:
+      c = 2
     elif int(i[5]) == 3:
       c = 3
     else:
@@ -133,6 +133,12 @@ def fill_data(table):
   for i in data:
     table.add_row(i)
   
+  for j in table.rows:
+    if int(j[5]) == 1:
+      j[5] = 2
+    elif int(j[5]) == 2:
+      j[5] = 1
+
   table.rows = sorted(table.rows, key=lambda x: x[5])
 
   #do some kind of thing to get the data
