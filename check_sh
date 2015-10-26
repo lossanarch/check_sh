@@ -151,7 +151,7 @@ def fill_data(table):
 def get_check_data():
   sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
   sock.connect(socket_path)
-  sock.send("GET services\nFilter: state >= 1\nFilter: service_scheduled_downtime_depth = 0\nAnd: 2\nColumns: host_name description plugin_output service_last_check host_last_check state\n")
+  sock.send("GET services\nFilter: state >= 1\nFilter: service_scheduled_downtime_depth = 0\nFilter: acknowledged = 0\nAnd: 3\nColumns: host_name description plugin_output service_last_check host_last_check state\n")
   sock.shutdown(socket.SHUT_WR)
   a = sock.recv(100000000)
   sock.close()
